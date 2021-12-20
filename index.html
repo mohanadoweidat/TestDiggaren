@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diggaren</title>
+    <link rel="stylesheet" type="text/css" href="indexstyle.css" />
+    <script src="script.js" defer></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500&display=swap" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="box header">
+            <h2>Diggaren</h2>
+            <div class="logout">
+                <img class="logout-main" src="logout.png" alt="Logga ut">
+                <img class="logout-hover" src="logout-light.png" alt="Logga ut">
+            </div>
+        </div>
+        <div class="box channel">
+            <h3>Kanaler</h3>
+            <div id="channel-container" class="channel_c"></div>
+        </div>
+        <div class="box main">
+            <h1>Spelas just nu</h1>
+            <div id="music-box">Låt - Låtartist</div>
+
+
+            <div id="recommendation">
+                <h3>Rekommendationer från Spotify</h3>
+                <div id="recomm-container">
+                    <div>Låt - Låtartist</div>
+                </div>
+            </div>
+
+
+            <div id="recommendation">
+                <h3>Artist albums</h3>
+                <div id="recomm-container">
+                    <div>Just nu spelas inget!</div> 
+                </div>
+            </div>
+            
+
+        </div>
+        <div class="box playlist">
+            <h3>Spellistor</h3>
+            <div id="playlist-container">
+                <div>Spellista</div>
+                <div>Spellista</div>
+                <div>Spellista</div>
+                <div>Spellista</div>
+                <div>Spellista</div>
+                <div>Spellista</div>
+                <div>Spellista</div>
+                <div>Spellista</div>
+                <div>Spellista</div>
+            </div>
+        </div>
+        
+        <div class="box footer">
+            <script>
+                document.write('&copy;' );
+                document.write(' 2021 - ');
+                document.write(new Date().getFullYear());
+                document.write(' Diggaren - All Rights Reserved.');
+                document.write(' <br/>Created by: <u>Mohanad && Hazem && Qasem && Felicia</u>');
+                
+              </script>
+        </div>
+    </div>
+</body>
+</html>

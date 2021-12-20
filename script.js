@@ -35,6 +35,50 @@ function addChannelButtons() {
 
 
 
+function addChannelButtons2(){
+
+    /*
+    var channelsInfo =  $.getJSON('channels.json', function(channelsData) {
+        console.log('Channels fetched');
+     })
+     */
+
+     var channelsInfo  = $.ajax({
+         url: 'channels.json',
+         dataType: 'json',
+         cache: false
+     })
+     .done(function() {
+        var channels = JSON.parse(channelsInfo.responseText);
+        // Adds a button for each channel in the JSON object
+        for(var channel in channels) {
+            if(channels.hasOwnProperty(channel)) {
+                let button = $('<div />', {
+                    class: "channels",
+                    text: channels[channel],
+                    value: channel,
+                    on: {
+                        click: function() {
+                            //radio(this.textContent, this.getAttribute('value'));
+                            alert(this.getAttribute('value'))
+                        }
+                    }
+                });
+                $('.channel_c').append(button);
+            }
+        }
+
+    })
+    .fail(function() {
+        console.log('Channels failed');
+    })
+    .always(function() {
+        console.log('Channels done');
+    });
+}
+
+
+
 // Gets the name of the channel corresponding the the channel ID from the backend
 function getChannelName(channelID) {
     var channelName = $.get('/channelName?channelID=' + channelID, function() {
@@ -50,5 +94,5 @@ function getChannelName(channelID) {
 
 // When page is loaded, adds various buttons
 $(document).ready(function(){
-    addChannelButtons();
+    addChannelButtons2();
 });

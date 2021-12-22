@@ -2,12 +2,25 @@
 
 var client_id = '2a2c79748c3a4ce09c58e3ca7ebab575'; // Your client id
 var client_secret = 'ed68a2d9157e45da801a244bf81300fe'; // Your secret
-var redirect_uri = 'http://127.0.0.1:5500'; // Your redirect uri
+var redirect_uri = 'https://mohanadoweidat.github.io/TestDiggaren'; // Your redirect uri
 var code = 0;
 var access_token = 0;
 var refresh_token = 0;
 var tokenValidTime = 360000000 // In ms ---> 3600 s ---> 60 min ---> 1 h 
 setCookie("trackID", -1)
+
+
+
+//TODO: 
+/*
+   - Fix autogenerating refreshtoken with setinterval.
+   - Fix logout button.
+   - Fix design on index.html page.
+   - Fix design on login.html page.
+*/
+
+
+
 
 /**
  * General functions.
@@ -498,7 +511,7 @@ function onPageLoad(){
     {
         if( access_token == 0 || getCookie("accessToken") == null){
             //We dont have a token --> login
-            var url = "http://127.0.0.1:5500/login.html"
+            var url = "https://mohanadoweidat.github.io/TestDiggaren/login.html"
             window.location.replace(url)
         }
         // DO stuff.

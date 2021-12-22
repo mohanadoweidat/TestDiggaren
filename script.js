@@ -17,6 +17,7 @@ setCookie("trackID", -1)
    - Fix logout button.
    - Fix design on index.html page.
    - Fix design on login.html page.
+   - Fix so that all pages are responsive.
 */
 
 

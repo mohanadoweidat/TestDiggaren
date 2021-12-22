@@ -12,9 +12,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500&display=swap" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
-<body>
+<body onload="onPageLoad()">
     <div class="wrapper">
         <div class="box header">
             <h2>Diggaren</h2>
@@ -29,39 +30,31 @@
         </div>
         <div class="box main">
             <h1>Spelas just nu</h1>
-            <div id="music-box">Låt - Låtartist</div>
+            <div id="music-box" class="music_b">
+
+            </div>
 
 
             <div id="recommendation">
                 <h3>Rekommendationer från Spotify</h3>
                 <div id="recomm-container">
-                    <div>Låt - Låtartist</div>
+                   
                 </div>
             </div>
 
 
-            <div id="recommendation">
+            <div id="album">
                 <h3>Artist albums</h3>
-                <div id="recomm-container">
-                    <div>Just nu spelas inget!</div> 
+                <div id="album-container">
+                    Just nu spelas ingen musik.
                 </div>
             </div>
             
 
         </div>
         <div class="box playlist">
-            <h3>Spellistor</h3>
-            <div id="playlist-container">
-                <div>Spellista</div>
-                <div>Spellista</div>
-                <div>Spellista</div>
-                <div>Spellista</div>
-                <div>Spellista</div>
-                <div>Spellista</div>
-                <div>Spellista</div>
-                <div>Spellista</div>
-                <div>Spellista</div>
-            </div>
+            <h3>Lägg till en låt i en spellista.</h3>
+            <div id="playlist-container" class="playlist_c"></div>
         </div>
         
         <div class="box footer">

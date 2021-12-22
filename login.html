@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Diggaren</title>
     <link rel="stylesheet" href="loginstyle.css">
+    <script src="script.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500&display=swap" rel="stylesheet">
@@ -18,12 +19,21 @@
             <h2>Diggaren</h2>
         </div>
         <div class="box login">
-            <h1>Logga in och upptäck musik</h1>
+            <h1>Logga in med spotify</h1>
+            <br>
             <div id="login-container">
-                pokpokdpfoksd
+               <a id="login_btn" onclick="requestAuthentication()"></a>
             </div>
         </div>
-        <div class="box footer">Box 5</div>
+        <div class="box footer"> 
+            <script>
+            document.write('&copy;' );
+            document.write(' 2021 - ');
+            document.write(new Date().getFullYear());
+            document.write(' Diggaren - All Rights Reserved.');
+            document.write(' <br/>Created by: <u>Mohanad && Hazem && Qasem && Felicia</u>');
+          </script>
+          </div>
     </div>
 </body>
 </html>

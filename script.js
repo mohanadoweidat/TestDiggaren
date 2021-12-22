@@ -1,54 +1,105 @@
-// Adds buttons for each radio channel to a dropdown menu
-function addChannelButtons() {
-    // Requests a list of channels from the backend
-    var getChannels = $.get('/channels', function() {
-            console.log('Channels fetched');
-        })
-            .done(function() {
-                var channels = JSON.parse(getChannels.responseText);
-                // Adds a button for each channel in the JSON object
-                for(var channel in channels) {
-                    if(channels.hasOwnProperty(channel)) {
-                        let button = $('<div />', {
-                            class: "channels",
-                            text: channels[channel],
-                            value: channel,
-                            on: {
-                                click: function() {
-                                    //radio(this.textContent, this.getAttribute('value'));
-                                    alert(this.getAttribute('value'))
-                                }
-                            }
-                        });
-                        $('.channel_c').append(button);
-                    }
-                }
 
-            })
-            .fail(function() {
-                console.log('Channels failed');
-            })
-            .always(function() {
-                console.log('Channels done');
-            });
+
+var client_id = '2a2c79748c3a4ce09c58e3ca7ebab575'; // Your client id
+var client_secret = 'ed68a2d9157e45da801a244bf81300fe'; // Your secret
+var redirect_uri = 'http://127.0.0.1:5500'; // Your redirect uri
+var code = 0;
+var access_token = 0;
+var refresh_token = 0;
+var tokenValidTime = 360000000 // In ms ---> 3600 s ---> 60 min ---> 1 h 
+setCookie("trackID", -1)
+
+/**
+ * General functions.
+ */
+ 
+// When page is loaded, adds various buttons
+$(document).ready(function(){
+    addChannelButtons();
+    $('.music_b').html('Ingen låt spelas just nu.');
+    $('#recomm-container').html('Just nu spelas ingen musik.');
+    $('#album-container').html('Just nu spelas ingen musik.');
+});
+
+
+// Returns the cookie with the given identifier in the parameter
+// parameter - variable name of cookie
+function getCookie(cname) {
+    var name = cname + "=";
+    var decodedCookie = decodeURIComponent(document.cookie);
+    var ca = decodedCookie.split(';');
+    for(var i = 0; i <ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
+// Sets a given cookie in the browser
+function setCookie(name, value) {
+    document.cookie = name + '=' + value;
 }
 
 
 
-function addChannelButtons2(){
 
+/**
+ * 
+ * Alert messages.
+ */
+function alertMessage_songAdded(){
+    Swal.fire(
+        'Klar!',
+        'Låten har lagts till i din spellista!',
+        'success'
+      )
+}
+
+function alertMessage_NoSongPlaying(){
+    Swal.fire(
+        'OBS!',
+        'Det finns ingen låt som spelas just nu, välj en kanal först!',
+        'warning'
+      )
+}
+
+function alertMessage_wrongSongName(){
+    Swal.fire(
+        'OBS!',
+        'Namnet på låten som spelas just nu är felaktig skriven, alltså går det inte att lägga till det i spotify spellistan. !',
+        'error'
+      )
+}
+
+
+
+
+
+/**
+ * Main functions.
+ */
+// Adds buttons for each radio channel to a dropdown menu
+function addChannelButtons(){
+
+    //Another way.
     /*
     var channelsInfo =  $.getJSON('channels.json', function(channelsData) {
         console.log('Channels fetched');
      })
      */
 
+    // Requests a list of channels from the json file.
      var channelsInfo  = $.ajax({
          url: 'channels.json',
          dataType: 'json',
          cache: false
      })
      .done(function() {
+        console.log('Channels fetched');
         var channels = JSON.parse(channelsInfo.responseText);
         // Adds a button for each channel in the JSON object
         for(var channel in channels) {
@@ -59,8 +110,7 @@ function addChannelButtons2(){
                     value: channel,
                     on: {
                         click: function() {
-                            //radio(this.textContent, this.getAttribute('value'));
-                            alert(this.getAttribute('value'))
+                            radio(this.textContent, this.getAttribute('value'));
                         }
                     }
                 });
@@ -76,23 +126,391 @@ function addChannelButtons2(){
         console.log('Channels done');
     });
 }
-
-
-
-// Gets the name of the channel corresponding the the channel ID from the backend
-function getChannelName(channelID) {
-    var channelName = $.get('/channelName?channelID=' + channelID, function() {
-        console.log("Getting channel name som har id:" + channelID);
+// Gets the name of the channel corresponding to the channel ID choosed by the user. 
+function getChannelName(channelID){
+     var channelsInfo =$.ajax({
+        url: 'channels.json',
+        dataType: 'json',
+        cache: false
     })
-        .done(function() {
-           // radio(channelName.responseText, channelID);
-        })
+    .done(function(){
+        var channelData = JSON.parse(channelsInfo.responseText);
+        var channelName = channelData[channelID]
+        radio(channelName.responseText, channelID)
+    })
+}
+// When changing the radiochannel updates the website with the correct information
+function radio(channel, channelID) {
+    console.log('Running radio on: ' + channel + ", " + channelID);
+    setCookie('channelID', channelID);
+    updateSongInfo();
+    //$('.music_b').html('Spelas just nu på ' + channel + ':');
+}
+// Gets the currently playing song from the radio and presents it in the browser
+function updateSongInfo() {
+    var nowPlaying = 'Just nu spelas ingen musik.';
+    var data = {};
+    data.channelID = getCookie('channelID');
+    // Request is sent to fetch currently playing song
+    $.ajax({
+        type: "POST",
+        url: "http://localhost:5050/SR/currentlyPlaying",
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify({
+            "channelID": data.channelID
+        }), 
+        //async:false,
+        dataType: "json",
+        success:function (successResponse,textStatus,jqXHR) {
+             // If there is a song currently playing, save the ID to cookie and present the song info to the browser
+             if(successResponse['playingSongName'] != null) {
+                var songName = successResponse['playingSongName'];
+                var artistName = successResponse['playingSongArtist'];
+                var startTime = new Date(successResponse['nextSongStartTime']);
+                var startTime = startTime.getMilliseconds() - new Date().getMilliseconds;
+                nowPlaying = songName + ' - ' + artistName;
+                console.log("Currently playing song:" + nowPlaying)
+                savetrackID(songName);
+                saveArtistID(artistName)
+            }
+            $('.music_b').html(nowPlaying);
+            getRecommendation();
+            getAlbums();      
+        },
+        error: function (errorResponse1) {
+            $('.music_b').html('Just nu spelas ingenting.');
+            setCookie('trackID', -1);
+           
+            $('#recomm-container').html('Just nu spelas ingen musik.');
+            $('#album-container').html('Just nu spelas ingen musik.')
+             console.log("Track id when dont exist:" + getCookie("trackID"))
+             console.log("Currently: " + errorResponse1.status)
+        }
+    }); 
+}
+//This function will fetsh all users playlists from spotify.
+function getPlaylists(data){
+    $.ajax({
+        type: "POST",
+        url: "http://localhost:5050/spotify/playlist/fetch",
+        contentType: "application/json",
+        data: JSON.stringify({
+            "auth": data
+        }), 
+        dataType: "json",
+        success:function (successResponse,textStatus,jqXHR) {
+            for(var key in successResponse.items) {
+                console.log('adding playlists from spotify(Fetch works):');
+                var playListName = successResponse.items[key].name
+                console.log( 'Playlist Name: ' + playListName);
+                var playListID = String(successResponse.items[key].id);
+                console.log( 'Playlist ID: ' + playListID);
+                btn = $('<div />', {
+                    class: "spellista",
+                    text : playListName,
+                    type  : 'div',
+                    value : playListID,
+                    on    : {
+                        click: function() {
+                            if(getCookie('trackID') == -1){     
+                            alertMessage_NoSongPlaying();
+                            return;
+                           }
+                           else{
+                           addToPlaylist(getCookie('trackID'), this.getAttribute('value')); 
+                           }
+                        }
+                    }
+                });
+                $('.playlist_c').append(btn);
+            }
+            return successResponse;
+        },
+        error: function (errorResponse1) {
+            console.log("Fetch: " + errorResponse1.status);
+        }
+    });
+}
+// Adds the given song to the given playlist on Spotify
+function addToPlaylist(trackID, playlistID) {
+    $.ajax( {
+        url: 'http://localhost:5050/spotify/playlist/add',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            "auth": getCookie('accessToken'),
+            "playlist_id": playlistID,
+            "track_id": trackID
+        }), 
+        dataType: "json",
+        success: alertMessage_songAdded()   
+        ,
+        error: function (errorResponse1) {
+            console.log("Fetch: " + errorResponse1.status);
+            return null;
+        }
+    });
+}
+// Saves the currently playing songs Spotify ID to a cookie
+function savetrackID(songName) {
+    $.ajax({
+        url: 'http://localhost:5050/spotify/search',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            "auth": getCookie('accessToken'),
+            "type": "track",
+            "query": songName
+        }),
+        dataType: "json",
+        async:false,
+        success: function(result){
 
-        
+            //Old way
+            //if(!result.tracks.items[0].id == undefined) return; 
+            if(!result.tracks.items[0].id){
+                setCookie('trackID', -1);
+            } else { 
+                var trackID = result.tracks.items[0].id;
+                setCookie('trackID', trackID);
+            } 
+            
+            //New way-- Funkar inte. 
+            /*
+            for (const key in result.tracks.items) {
+                if(result.tracks.items[key].name == songName){
+                    var trackID = result.tracks.items[key].id;
+                    setCookie('trackID', trackID);
+                    console.log("HERE::Track id::-->" + getCookie("trackID"))
+                    break;
+               }
+               else{
+                setCookie('trackID', -1);
+                alertMessage_wrongSongName();
+               }  
+           } */ 
+        },
+        error: function (errorResponse1) {
+            console.log('Search: ' + errorResponse1);
+        }
+    });	
+}
+ //Saves the currently playing songs artist ID to a cookie
+function saveArtistID(artistName){
+    
+    $.ajax({
+        url: 'http://localhost:5050/spotify/search',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            'auth': getCookie('accessToken'),
+            'type': 'artist',
+            'query': artistName
+        }),
+        async:false,
+        success: function(result) {
+            var  artistNameToSplit = artistName.split(/[&,()]+/);
+            var  artistNametoSearch = artistNameToSplit[0];
+            if(artistNameToSplit.length > 1){
+                artistNametoSearch = artistNameToSplit[0].substring(0, artistNameToSplit[0].length -1)
+                console.log(" Artist name After split:" + artistNametoSearch)
+            }
+            var artistId = 0;
+                for (const key in result.artists.items) {
+                      if(result.artists.items[key].name == artistNametoSearch){
+                        var nameSplitInSpotify = result.artists.items[key].name.split(/[&,()]+/); // Split artist name inside spotify respone.
+                        var artistId = result.artists.items[key].id;
+                        if(nameSplitInSpotify.length > 1){
+                            artistId = result.artists.items[nameSplitInSpotify[0].substring(0, nameSplitInSpotify[0].length - 1)].id
+                        }
+                    }
+                    else{
+                        artistId = result.artists.items[key].id
+                        break;
+                    }
+                     
+                    //console.log("HERE::Artist ID::::" + artistId)
+                    setCookie('artistId', artistId);
+                }
+                console.log("Här hämtas artist id: " + getCookie('artistId') + "  från spotify Med hjälp av artistens namn.") 
+        },
+        error: function(request, status, error) {
+            console.log('Search: ' + status);
+        }
+    })
+}
+// Request is sent to fetch recommendations based on the currently playing song
+function getRecommendation(){
+    console.log("Recommendation running on channel id: " + getCookie('channelID'));
+    console.log("Getting recomendation for song with id: " + getCookie("trackID"))
+    if(getCookie('trackID') != -1) {
+        $.ajax({
+            url: 'http://localhost:5050/spotify/recommendation',
+            type: 'POST',
+            data: JSON.stringify({
+                'auth': getCookie('accessToken'),
+                'trackID': getCookie('trackID')
+            }),
+            contentType: 'application/json',
+            dataType: "json",
+            success: function(result) {
+                var recommendedName = result['trackName'];
+                var recommendedArtist = result['artistName'];
+                console.log("Recommendation works");
+                $('#recomm-container').html(recommendedName + ' - ' + recommendedArtist);
+            },
+            error:function(request, status, error){
+                console.log("Recommendation: " + status);
+            }
+        });
+    }
+    else{
+        $('#recomm-container').html('Just nu spelas ingen musik.');
+    }
+}
+// Gets all the albums of the given artist id and creates a button for each album
+function getAlbums(){
+    var id = getCookie('artistId')
+    console.log("Artist id som ska skickas till spotify för att hämta dess album är:" + id)
+    if(getCookie("artistId")){
+    $.ajax({
+        type:"POST",
+        url: 'http://localhost:5050/spotify/artistAlbums',
+        data: JSON.stringify({
+            'auth': getCookie('accessToken'),
+            'artistId' : getCookie('artistId')
+        }),
+        contentType: 'application/json',
+        success: function(result) {
+            $('#album-container').empty();
+            for(var key in result.items) {
+                console.log('Adding albums from spotify(Fetch works):');
+                var albumID = String(result.items[key].id);
+                console.log( 'Album ID: ' + albumID);
+                var AlbumName = result.items[key].name
+                console.log( 'Album Name: ' + AlbumName);
+                btn = $('<div />', {
+                    class: "albums",
+                    text : AlbumName,
+                    type  : 'div',
+                    value : albumID
+                });
+                $('#album-container').append(btn);
+            }
+            console.log("Get artistAlbums works");
+            return result;
+        },
+        error: function(request, status, error){
+            console.log("Fetch: " + status);
+            return null;
+        }
+    });
+    }else{
+        $('#album-container').html('Just nu spelas ingen musik.');
+    }
 }
 
 
-// When page is loaded, adds various buttons
-$(document).ready(function(){
-    addChannelButtons2();
-});
+
+/*
+ * Spotify auth section
+ * 
+ */
+
+ // Gets requried code for auth process when user click the login button.
+function requestAuthentication(){
+    // your application requests authorization
+    var scope = 'user-library-modify user-library-read user-read-private user-read-email user-follow-modify user-follow-read playlist-modify-public playlist-read-collaborative playlist-read-private playlist-modify-private';
+     
+    // AUTHORIZE with Spotify (if needed)
+     let url = new URL('https://accounts.spotify.com/authorize?');
+     let params = new URLSearchParams('client_id=' +client_id+'&response_type=code&scope='+scope+'&redirect_uri='+encodeURI(redirect_uri)+'&show_dialog='+true+'');
+     window.location.replace(url + params.toString())
+}
+
+//This function will get the auth code from the url.
+function getCode(){
+    let code = null;
+    const queryString = window.location.search;
+    if ( queryString.length > 0 ){
+        const urlParams = new URLSearchParams(queryString);
+        code = urlParams.get('code')
+        setCookie("code", code)
+    }
+    return code;
+}
+
+//This function will send the body and the code for fetching the access token.
+function fetchAccessToken(code){
+    let body = "grant_type=authorization_code";
+    body += "&code=" + code; 
+    body += "&redirect_uri=" + encodeURI(redirect_uri);
+    body += "&client_id=" + client_id;
+    body += "&client_secret=" + client_secret;
+    callAuthorizationApi(body);
+}
+
+//This function will obatain a new accesstoken with help of the refreshtoken.
+    function refreshAccessToken(){
+        refresh_token = getCookie("refreshToken")
+        let body = "grant_type=refresh_token";
+        body += "&refresh_token=" + refresh_token;
+        body += "&client_id=" + client_id;
+        callAuthorizationApi(body);
+        console.log("Refreshing token....")
+    }
+
+//This function will make a request to spotify for fetching the access and refresh tokens.
+function callAuthorizationApi(body){
+   let xhr = new XMLHttpRequest();
+   xhr.open("POST", "https://accounts.spotify.com/api/token", true)
+   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+   xhr.setRequestHeader('Authorization', 'Basic ' + btoa(client_id + ":" + client_secret));
+   xhr.send(body);
+   xhr.onload = handleAuthorizationResponse;
+ }
+
+ function handleAuthorizationResponse(){
+    if ( this.status == 200 ){
+        var data = JSON.parse(this.responseText);
+        //console.log(data); // This will write access and refreshtoken into the terminal.
+        if ( data.access_token != undefined ){
+            access_token = data.access_token;
+            setCookie('accessToken', access_token);
+        }
+        if ( data.refresh_token  != undefined ){
+            refresh_token = data.refresh_token;
+            setCookie('refreshToken', refresh_token);
+        }
+        onPageLoad();
+    }
+    else {
+        console.log(this.responseText);
+        alert(this.responseText); 
+    }
+}
+//This function will run on page loading.
+function onPageLoad(){
+    if(window.location.search.length > 0){
+        handlRedirect()
+    }
+    else
+    {
+        if( access_token == 0 || getCookie("accessToken") == null){
+            //We dont have a token --> login
+            var url = "http://127.0.0.1:5500/login.html"
+            window.location.replace(url)
+        }
+        // DO stuff.
+        getPlaylists(access_token)
+    }
+}
+
+function handlRedirect(){
+    let code = getCode()
+    fetchAccessToken(code)
+    window.history.pushState("", "", redirect_uri); // remove param from url
+}
+
+
+

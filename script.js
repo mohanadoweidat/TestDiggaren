@@ -1,5 +1,3 @@
-
-
 var client_id = '2a2c79748c3a4ce09c58e3ca7ebab575'; // Your client id
 var client_secret = 'ed68a2d9157e45da801a244bf81300fe'; // Your secret
 var redirect_uri = 'http://127.0.0.1:5500'; // Your redirect uri-local
@@ -7,6 +5,7 @@ var access_token = 0;
 var refresh_token = 0;
 var tokenValidTime = 360000000 // In ms ---> 3600 s ---> 60 min ---> 1 h 
 setCookie("trackID", -1)
+
 
 
 

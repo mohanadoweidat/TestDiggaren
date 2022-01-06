@@ -13,6 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500&display=swap" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
 </head>
 
 <body onload="onPageLoad()">
@@ -20,8 +21,9 @@
         <div class="box header">
             <h2>Diggaren</h2>
             <div class="logout">
-                <img class="logout-main" src="logout.png" alt="Logga ut">
-                <img class="logout-hover" src="logout-light.png" alt="Logga ut">
+                <img class="logout-main" src="logout.png" alt="Logga ut" onclick="logOut()">
+                <img class="logout-hover" src="logout-light.png" alt="Logga ut" onclick="logOut()">
+                
             </div>
         </div>
         <div class="box channel">

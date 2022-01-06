@@ -1,7 +1,16 @@
 /* Body */
+
+html {
+    height: 100%;
+  }
+
 body{
     background-image: linear-gradient(#064663, #041C32);
     font-family: 'Quicksand', sans-serif;
+    height: 100%;
+    margin: 0;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
 }
 
 /*Wrapper*/
